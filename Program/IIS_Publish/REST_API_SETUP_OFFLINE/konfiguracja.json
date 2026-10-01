@@ -1,0 +1,17 @@
+{
+  "SiteName": "REST_API",
+  "AppPoolName": "REST_API",
+  "InstallRoot": "C:\\inetpub\\REST_API",
+  "Port": 8088,
+  "HostHeader": "",
+  "SqlServer": "",
+  "SqlPort": 1433,
+  "SqlDatabase": "SietomSoft",
+  "UseWindowsAuthentication": false,
+  "SqlUser": "",
+  "SqlPassword": "",
+  "PrinterPort": 9100,
+  "PrinterTestAddress": "",
+  "OpenFirewall": true,
+  "DownloadDotNetIfMissing": true
+}

@@ -1,0 +1,28 @@
+^XA
+^CI28
+^PW1170
+^LL342
+^LH0,0
+^MD25
+
+^FX Wyśrodkowany tekst 1
+^FO0,50
+^A0N,60,60
+^FB1170,1,0,C
+^FDSR w Zgierzu^FS
+
+^FO45,130
+^BY3,2,90
+^BCN,90,Y,N,N
+^FD$BARCODE$^FS
+
+^FX Wyśrodkowany tekst 2
+^FO0,280
+^A0N,50,50
+^FB1170,1,0,C
+^FD$NAZWA$^FS
+
+^RS8,,,3
+^RFW,H,1,32,A
+^FD$EPC$^FS
+^XZ

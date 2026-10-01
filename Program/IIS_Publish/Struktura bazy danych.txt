@@ -1,0 +1,124 @@
+/* ============================================================
+   Utworzenie bazy danych SietomSoft
+   ============================================================ */
+
+USE [master];
+GO
+
+IF DB_ID(N'SietomSoft') IS NULL
+BEGIN
+    CREATE DATABASE [SietomSoft];
+    PRINT 'Utworzono bazę danych SietomSoft.';
+END
+ELSE
+BEGIN
+    PRINT 'Baza danych SietomSoft już istnieje.';
+END
+GO
+
+
+/* ============================================================
+   Przejście do bazy SietomSoft
+   ============================================================ */
+
+USE [SietomSoft];
+GO
+
+SET ANSI_NULLS ON;
+GO
+
+SET QUOTED_IDENTIFIER ON;
+GO
+
+
+/* ============================================================
+   Utworzenie tabeli dbo.OdebraneDane
+   ============================================================ */
+
+IF OBJECT_ID(N'[dbo].[OdebraneDane]', N'U') IS NULL
+BEGIN
+
+    CREATE TABLE [dbo].[OdebraneDane]
+    (
+        [id_row]             [int] IDENTITY(1,1) NOT NULL,
+        [Identyfikator]      [int] NULL,
+        [Wydzial]            [nvarchar](50) NULL,
+        [Repertorium]        [nvarchar](50) NULL,
+        [Nr_Sprawy]          [int] NULL,
+        [Rok]                [int] NULL,
+        [Tom]                [nvarchar](50) NULL,
+        [IP_Drukarka]        [nvarchar](50) NULL,
+        [Sygnatura_Text]     [nvarchar](50) NULL,
+        [Sygnatura_Barcode]  [nvarchar](50) NULL,
+        [Data]               [datetime] NULL,
+        [Start_Procesu]      [nvarchar](50) NULL,
+
+        CONSTRAINT [PK_OdebraneDane]
+            PRIMARY KEY CLUSTERED
+            (
+                [id_row] ASC
+            )
+            WITH
+            (
+                PAD_INDEX = OFF,
+                STATISTICS_NORECOMPUTE = OFF,
+                IGNORE_DUP_KEY = OFF,
+                ALLOW_ROW_LOCKS = ON,
+                ALLOW_PAGE_LOCKS = ON
+            )
+            ON [PRIMARY]
+    )
+    ON [PRIMARY];
+
+    PRINT 'Utworzono tabelę dbo.OdebraneDane.';
+
+END
+ELSE
+BEGIN
+    PRINT 'Tabela dbo.OdebraneDane już istnieje.';
+END
+GO
+
+
+/* ============================================================
+   Wartość domyślna dla pola Data
+   ============================================================ */
+
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM sys.default_constraints
+    WHERE name = N'DF_OdebraneDane_Data'
+)
+BEGIN
+    ALTER TABLE [dbo].[OdebraneDane]
+    ADD CONSTRAINT [DF_OdebraneDane_Data]
+        DEFAULT (GETDATE()) FOR [Data];
+
+    PRINT 'Dodano domyślną wartość GETDATE() dla pola Data.';
+END
+GO
+
+
+/* ============================================================
+   Wartość domyślna dla pola Start_Procesu
+   ============================================================ */
+
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM sys.default_constraints
+    WHERE name = N'DF_OdebraneDane_Start_Procesu'
+)
+BEGIN
+    ALTER TABLE [dbo].[OdebraneDane]
+    ADD CONSTRAINT [DF_OdebraneDane_Start_Procesu]
+        DEFAULT (N'RFID Wyszukiwanie Akt') FOR [Start_Procesu];
+
+    PRINT 'Dodano domyślną wartość dla pola Start_Procesu.';
+END
+GO
+
+
+PRINT 'Instalacja bazy SietomSoft zakończona.';
+GO

@@ -1,0 +1,175 @@
+# ============================================================
+# KONFIGURACJA
+# ============================================================
+
+# Przykłady:
+# localhost
+# .\SQLEXPRESS
+# SERWER\SQLEXPRESS
+# 192.168.1.100
+# 192.168.1.100,1433
+
+$SqlServer = ".\SQLEXPRESS"
+$DatabaseName = "SietomSoft"
+
+
+# ============================================================
+# POŁĄCZENIE Z SQL SERVER
+# ============================================================
+
+$ConnectionString = "Server=$SqlServer;Database=master;Integrated Security=True;TrustServerCertificate=True;"
+
+$Connection = New-Object System.Data.SqlClient.SqlConnection
+$Connection.ConnectionString = $ConnectionString
+
+try
+{
+    Write-Host "Laczenie z SQL Server: $SqlServer"
+
+    $Connection.Open()
+
+    Write-Host "Polaczenie OK."
+
+
+    # ========================================================
+    # UTWORZENIE BAZY DANYCH
+    # ========================================================
+
+    $SqlCreateDatabase = @"
+IF DB_ID(N'$DatabaseName') IS NULL
+BEGIN
+    CREATE DATABASE [$DatabaseName];
+END
+"@
+
+    $Command = $Connection.CreateCommand()
+    $Command.CommandText = $SqlCreateDatabase
+    $Command.CommandTimeout = 120
+    $Command.ExecuteNonQuery() | Out-Null
+
+    Write-Host "Baza danych $DatabaseName istnieje."
+
+
+    # ========================================================
+    # ZMIANA BAZY NA SIETOMSOFT
+    # ========================================================
+
+    $Connection.ChangeDatabase($DatabaseName)
+
+
+    # ========================================================
+    # UTWORZENIE TABELI
+    # ========================================================
+
+    $SqlCreateTable = @"
+IF OBJECT_ID(N'dbo.OdebraneDane', N'U') IS NULL
+BEGIN
+
+    CREATE TABLE [dbo].[OdebraneDane]
+    (
+        [id_row] [int] IDENTITY(1,1) NOT NULL,
+        [Identyfikator] [int] NULL,
+        [Wydzial] [nvarchar](50) NULL,
+        [Repertorium] [nvarchar](50) NULL,
+        [Nr_Sprawy] [int] NULL,
+        [Rok] [int] NULL,
+        [Tom] [nvarchar](50) NULL,
+        [IP_Drukarka] [nvarchar](50) NULL,
+        [Sygnatura_Text] [nvarchar](50) NULL,
+        [Sygnatura_Barcode] [nvarchar](50) NULL,
+        [Data] [datetime] NULL,
+        [Start_Procesu] [nvarchar](50) NULL,
+
+        CONSTRAINT [PK_OdebraneDane]
+        PRIMARY KEY CLUSTERED
+        (
+            [id_row] ASC
+        )
+    );
+
+END
+"@
+
+    $Command = $Connection.CreateCommand()
+    $Command.CommandText = $SqlCreateTable
+    $Command.CommandTimeout = 120
+    $Command.ExecuteNonQuery() | Out-Null
+
+    Write-Host "Tabela dbo.OdebraneDane istnieje."
+
+
+    # ========================================================
+    # DEFAULT DLA POLA DATA
+    # ========================================================
+
+    $SqlDefaultData = @"
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM sys.default_constraints
+    WHERE name = N'DF_OdebraneDane_Data'
+)
+BEGIN
+
+    ALTER TABLE [dbo].[OdebraneDane]
+    ADD CONSTRAINT [DF_OdebraneDane_Data]
+    DEFAULT (GETDATE()) FOR [Data];
+
+END
+"@
+
+    $Command = $Connection.CreateCommand()
+    $Command.CommandText = $SqlDefaultData
+    $Command.ExecuteNonQuery() | Out-Null
+
+
+    # ========================================================
+    # DEFAULT DLA START_PROCESU
+    # ========================================================
+
+    $SqlDefaultStartProcesu = @"
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM sys.default_constraints
+    WHERE name = N'DF_OdebraneDane_Start_Procesu'
+)
+BEGIN
+
+    ALTER TABLE [dbo].[OdebraneDane]
+    ADD CONSTRAINT [DF_OdebraneDane_Start_Procesu]
+    DEFAULT (N'RFID Wyszukiwanie Akt') FOR [Start_Procesu];
+
+END
+"@
+
+    $Command = $Connection.CreateCommand()
+    $Command.CommandText = $SqlDefaultStartProcesu
+    $Command.ExecuteNonQuery() | Out-Null
+
+
+    Write-Host ""
+    Write-Host "========================================="
+    Write-Host "INSTALACJA ZAKONCZONA POMYSLNIE"
+    Write-Host "========================================="
+    Write-Host "Baza:   $DatabaseName"
+    Write-Host "Tabela: dbo.OdebraneDane"
+    Write-Host "========================================="
+
+}
+catch
+{
+    Write-Host ""
+    Write-Host "BLAD:"
+    Write-Host $_.Exception.Message
+}
+finally
+{
+    if ($Connection.State -eq "Open")
+    {
+        $Connection.Close()
+    }
+}
+
+Write-Host ""
+Read-Host "Nacisnij ENTER aby zakonczyc"
